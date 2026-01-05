@@ -16,9 +16,13 @@ cargo build --release
 ```
 
 ### Install
-User-level (recommended):
+From repo root:
 ```bash
-/path/to/codex-taskloop-plugin/scripts/install.sh --scope user
+# user-level (recommended)
+./scripts/install.sh --scope user
+
+# project-level (project-only storage)
+./scripts/install.sh --scope project --project "$(pwd)"
 ```
 
 Windows (PowerShell):
@@ -26,16 +30,27 @@ Windows (PowerShell):
 .\scripts\install.ps1 -Scope user
 ```
 
-Project-level (project-only storage):
-```bash
-/path/to/codex-taskloop-plugin/scripts/install.sh --scope project --project "$(pwd)"
-```
+Parameters (Bash `install.sh`):
+- `--scope <user|project>`: install scope, default `project`
+- `--project <path>`: project path (used when `--scope project`)
+- `--name <name>`: MCP server / stop hook name (default `codex-taskloop-plugin`)
+- `--bin-dir <path>`: built binaries directory
+- `--no-mcp`: install binaries/skills only (skip MCP registration)
+- `--no-hook`: skip stop hook install
+- `--no-build`: skip build (requires `--bin-dir`)
 
-Binary detection and overrides:
-- The install scripts look for `codex-taskloop-plugin`, `codex-taskloop-plugin-hook`, and `codex-taskloop-plugin-admin`
-- Default search order: `<script_dir>/../target/release`, `<script_dir>/../bin`
-- If not found and `cargo` is available, they build unless you pass `--no-build` / `-NoBuild`
-- To use a custom location: `--bin-dir /path/to/dir` (PowerShell: `-BinDir`)
+Parameters (PowerShell `install.ps1`):
+- `-Scope <user|project>`: install scope, default `project`
+- `-Project <path>`: project path (used when `-Scope project`)
+- `-Name <name>`: MCP server / stop hook name (default `codex-taskloop-plugin`)
+- `-BinDir <path>`: built binaries directory
+- `-NoMcp`: install binaries/skills only (skip MCP registration)
+- `-NoHook`: skip stop hook install
+- `-NoBuild`: skip build (requires `-BinDir`)
+
+Binary lookup:
+- Searches `<script_dir>/../target/release` then `<script_dir>/../bin` for `codex-taskloop-plugin`, `codex-taskloop-plugin-hook`, `codex-taskloop-plugin-admin`; builds with `cargo` unless `--no-build` / `-NoBuild`.
+- Override with `--bin-dir` / `-BinDir`.
 
 ### Task data storage
 

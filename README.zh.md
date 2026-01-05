@@ -16,9 +16,13 @@ cargo build --release
 ```
 
 ### 安装
-用户级（推荐）：
+在仓库根目录：
 ```bash
-/path/to/codex-taskloop-plugin/scripts/install.sh --scope user
+# 用户级（推荐）
+./scripts/install.sh --scope user
+
+# 项目级（仅项目级存储）
+./scripts/install.sh --scope project --project "$(pwd)"
 ```
 
 Windows（PowerShell）：
@@ -26,51 +30,26 @@ Windows（PowerShell）：
 .\scripts\install.ps1 -Scope user
 ```
 
-项目级（仅项目级存储）：
-```bash
-/path/to/codex-taskloop-plugin/scripts/install.sh --scope project --project "$(pwd)"
-```
-
-完整参数（Bash `install.sh`）：
+参数（Bash `install.sh`）：
 - `--scope <user|project>`：安装范围，默认 `project`
 - `--project <path>`：项目路径（`--scope project` 时使用）
 - `--name <name>`：MCP server 名称/stop hook 名称（默认 `codex-taskloop-plugin`）
-- `--bin-dir <path>`：指定已构建的二进制目录
-- `--no-mcp`：仅安装/复制二进制与技能，不注册 MCP
+- `--bin-dir <path>`：已构建二进制目录
+- `--no-mcp`：仅安装/复制二进制与技能（不注册 MCP）
 - `--no-hook`：不安装 stop hook
 - `--no-build`：不自动构建（需 `--bin-dir` 提供二进制）
 
-完整参数（PowerShell `install.ps1`）：
+参数（PowerShell `install.ps1`）：
 - `-Scope <user|project>`：安装范围，默认 `project`
 - `-Project <path>`：项目路径（`-Scope project` 时使用）
 - `-Name <name>`：MCP server 名称/stop hook 名称（默认 `codex-taskloop-plugin`）
-- `-BinDir <path>`：指定已构建的二进制目录
-- `-NoMcp`：仅安装/复制二进制与技能，不注册 MCP
+- `-BinDir <path>`：已构建二进制目录
+- `-NoMcp`：仅安装/复制二进制与技能（不注册 MCP）
 - `-NoHook`：不安装 stop hook
 - `-NoBuild`：不自动构建（需 `-BinDir` 提供二进制）
 
-常见用法示例：
-```bash
-# 用户级 + 自定义名称 + 指定二进制目录
-./scripts/install.sh --scope user --name my-taskloop --bin-dir ./bin
-
-# 项目级 + 指定项目路径 + 仅安装 MCP（不装 hook）
-./scripts/install.sh --scope project --project "/path/to/project" --no-hook
-```
-
-PowerShell 示例：
-```powershell
-# 用户级 + 自定义名称 + 指定二进制目录
-.\scripts\install.ps1 -Scope user -Name my-taskloop -BinDir .\bin
-
-# 项目级 + 指定项目路径 + 仅安装 MCP（不装 hook）
-.\scripts\install.ps1 -Scope project -Project "C:\path\to\project" -NoHook
-```
-
-二进制自动搜索与指定目录：
-- 安装脚本会寻找 `codex-taskloop-plugin`、`codex-taskloop-plugin-hook`、`codex-taskloop-plugin-admin`
-- 默认搜索顺序：`<script_dir>/../target/release`、`<script_dir>/../bin`
-- 未找到且有 `cargo` 时会自动构建（可用 `--no-build` / `-NoBuild` 关闭）
+二进制查找：
+- 依次在 `<script_dir>/../target/release`、`<script_dir>/../bin` 查找 `codex-taskloop-plugin`、`codex-taskloop-plugin-hook`、`codex-taskloop-plugin-admin`；未找到且有 `cargo` 时会自动构建（`--no-build` / `-NoBuild` 关闭）
 - 指定目录：`--bin-dir /path/to/dir`（PowerShell: `-BinDir`）
 
 ### 任务数据存储
