@@ -120,7 +120,7 @@ struct Decision {
 
 fn main() {
     if let Err(err) = run() {
-        eprintln!("codex-taskloop-hook error: {err}");
+        eprintln!("codex-taskloop-plugin-hook error: {err}");
         output(&Decision {
             decision: "approve",
             ..Decision::default()

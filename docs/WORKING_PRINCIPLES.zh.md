@@ -1,16 +1,16 @@
-# 工作原理：codex-taskloop
+# 工作原理：codex-taskloop-plugin
 
 本文描述 Codex 中 Taskloop 任务循环的内部机制，内容与 `src/main.rs` 和
 `src/bin/hook.rs` 当前实现一致。
 
 ## 组件
 
-1) MCP server（`codex-taskloop`）
+1) MCP server（`codex-taskloop-plugin`）
 - 创建任务 state。
 - 维护 `meta.json` 索引。
 - 暴露 MCP 工具。
 
-2) Stop hook（`codex-taskloop-hook`）
+2) Stop hook（`codex-taskloop-plugin-hook`）
 - 每次 stop 时触发。
 - 决定是否阻止 stop。
 

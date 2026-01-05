@@ -10,7 +10,7 @@ const HOOK_KEY: &str = "Stop";
 
 fn main() {
     if let Err(err) = run() {
-        eprintln!("codex-taskloop-admin error: {err}");
+        eprintln!("codex-taskloop-plugin-admin error: {err}");
         std::process::exit(1);
     }
 }
@@ -425,10 +425,10 @@ fn append_stop_hook_block(
 
 fn print_usage() {
     eprintln!("Usage:");
-    eprintln!("  codex-taskloop-admin hooks add --project <dir> --command <path>");
-    eprintln!("  codex-taskloop-admin hooks remove --project <dir> --command <path>");
-    eprintln!("  codex-taskloop-admin mcp add --name <name> --command <path> [--project <dir>] [--storage-scope <value>]");
-    eprintln!("  codex-taskloop-admin mcp remove --name <name>");
-    eprintln!("  codex-taskloop-admin stop-hooks add --name <name> --command <path> [--order N] [--timeout N] [--timeout-ms N]");
-    eprintln!("  codex-taskloop-admin stop-hooks remove --name <name>");
+    eprintln!("  codex-taskloop-plugin-admin hooks add --project <dir> --command <path>");
+    eprintln!("  codex-taskloop-plugin-admin hooks remove --project <dir> --command <path>");
+    eprintln!("  codex-taskloop-plugin-admin mcp add --name <name> --command <path> [--project <dir>] [--storage-scope <value>]");
+    eprintln!("  codex-taskloop-plugin-admin mcp remove --name <name>");
+    eprintln!("  codex-taskloop-plugin-admin stop-hooks add --name <name> --command <path> [--order N] [--timeout N] [--timeout-ms N]");
+    eprintln!("  codex-taskloop-plugin-admin stop-hooks remove --name <name>");
 }

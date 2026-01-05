@@ -1,16 +1,16 @@
-# Working Principles: codex-taskloop
+# Working Principles: codex-taskloop-plugin
 
 This document describes the internal behavior of the Taskloop task loop for Codex.
 It matches the current code in `src/main.rs` and `src/bin/hook.rs`.
 
 ## Components
 
-1) MCP server (`codex-taskloop`)
+1) MCP server (`codex-taskloop-plugin`)
 - Creates task state files.
 - Maintains `meta.json` index.
 - Exposes MCP tools for task control.
 
-2) Stop hook (`codex-taskloop-hook`)
+2) Stop hook (`codex-taskloop-plugin-hook`)
 - Runs on every stop attempt.
 - Decides whether to block or approve stopping.
 

@@ -2,7 +2,7 @@ param(
   [ValidateSet("project", "user")]
   [string]$Scope = "project",
   [string]$Project = (Get-Location).Path,
-  [string]$Name = "codex-taskloop",
+  [string]$Name = "codex-taskloop-plugin",
   [string]$BinDir = "",
   [switch]$NoMcp,
   [switch]$NoHook,
@@ -35,9 +35,9 @@ function Find-BinSources([string]$overrideDir) {
   }
   foreach ($dir in $candidates) {
     if (-not (Test-Path $dir)) { continue }
-    $mcp = Resolve-BinInDir $dir "codex-taskloop"
-    $hook = Resolve-BinInDir $dir "codex-taskloop-hook"
-    $admin = Resolve-BinInDir $dir "codex-taskloop-admin"
+    $mcp = Resolve-BinInDir $dir "codex-taskloop-plugin"
+    $hook = Resolve-BinInDir $dir "codex-taskloop-plugin-hook"
+    $admin = Resolve-BinInDir $dir "codex-taskloop-plugin-admin"
     if ($mcp -and $hook -and $admin) {
       return @{ Dir = $dir; Mcp = $mcp; Hook = $hook; Admin = $admin }
     }
@@ -115,8 +115,8 @@ if (-not $NoMcp) {
 
 $skillSourceDir = $null
 $skillCandidates = @(
-  (Join-Path $RepoRoot ".codex\skills\codex-taskloop"),
-  (Join-Path $RepoRoot "skills\codex-taskloop")
+  (Join-Path $RepoRoot ".codex\skills\codex-taskloop-plugin"),
+  (Join-Path $RepoRoot "skills\codex-taskloop-plugin")
 )
 foreach ($candidate in $skillCandidates) {
   if (Test-Path $candidate) {
@@ -125,20 +125,20 @@ foreach ($candidate in $skillCandidates) {
   }
 }
 if (-not $skillSourceDir) {
-  Write-Error "Skill source not found; expected .codex\\skills\\codex-taskloop or skills\\codex-taskloop"
+  Write-Error "Skill source not found; expected .codex\\skills\\codex-taskloop-plugin or skills\\codex-taskloop-plugin"
   exit 1
 }
 
 if ($Scope -eq "project") {
-  $projectSkillDir = Join-Path $Project ".codex\skills\codex-taskloop"
+  $projectSkillDir = Join-Path $Project ".codex\skills\codex-taskloop-plugin"
   New-Item -ItemType Directory -Force (Join-Path $Project ".codex\skills") | Out-Null
   if (Test-Path $projectSkillDir) { Remove-Item -Recurse -Force $projectSkillDir }
   Copy-Item -Recurse $skillSourceDir $projectSkillDir
-  Write-Host "Installed codex-taskloop (project-level MCP + Stop hook). Project: $Project | MCP: $Name | Hook: $hookBin | Bin: $binDestDir | Skill: $projectSkillDir"
+  Write-Host "Installed codex-taskloop-plugin (project-level MCP + Stop hook). Project: $Project | MCP: $Name | Hook: $hookBin | Bin: $binDestDir | Skill: $projectSkillDir"
 } else {
-  $userSkillDir = Join-Path $codexHomeDir "skills\codex-taskloop"
+  $userSkillDir = Join-Path $codexHomeDir "skills\codex-taskloop-plugin"
   New-Item -ItemType Directory -Force (Join-Path $codexHomeDir "skills") | Out-Null
   if (Test-Path $userSkillDir) { Remove-Item -Recurse -Force $userSkillDir }
   Copy-Item -Recurse $skillSourceDir $userSkillDir
-  Write-Host "Installed codex-taskloop (user-level MCP + Stop hook). MCP: $Name | Hook: $hookBin | Bin: $binDestDir | Skill: $userSkillDir"
+  Write-Host "Installed codex-taskloop-plugin (user-level MCP + Stop hook). MCP: $Name | Hook: $hookBin | Bin: $binDestDir | Skill: $userSkillDir"
 }

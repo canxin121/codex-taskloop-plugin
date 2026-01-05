@@ -1,11 +1,11 @@
 ---
-name: codex-taskloop
-description: Run in-session task loops via the codex-taskloop MCP server and stop hook.
+name: codex-taskloop-plugin
+description: Run in-session task loops via the codex-taskloop-plugin MCP server and stop hook.
 metadata:
   short-description: Taskloop MCP usage
 ---
 
-# Codex Taskloop
+# Codex Taskloop Plugin
 
 ## When to use
 
@@ -14,8 +14,8 @@ Taskloop tasks inside a single Codex session.
 
 ## Preconditions
 
-- The codex-taskloop MCP server is registered.
-- The codex-taskloop stop hook is installed.
+- The codex-taskloop-plugin MCP server is registered.
+- The codex-taskloop-plugin stop hook is installed.
 
 If not installed:
 - Project scope: `scripts/install.sh --scope project --project "<path>"`

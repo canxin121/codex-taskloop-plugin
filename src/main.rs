@@ -8,7 +8,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use fs2::FileExt;
-use rand::distributions::Alphanumeric;
+use rand::distr::Alphanumeric;
 use rand::Rng;
 use rmcp::ErrorData as McpError;
 use rmcp::ServiceExt;
@@ -1064,7 +1064,7 @@ fn update_meta_status(
 }
 
 fn generate_task_dir(root: &Path) -> String {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     for _ in 0..100 {
         let candidate: String = (&mut rng)
             .sample_iter(&Alphanumeric)

@@ -1,4 +1,4 @@
-# codex-taskloop
+# codex-taskloop-plugin
 
 让 Codex 在单个会话内持续工作，直到任务完成。
 
@@ -18,7 +18,7 @@ cargo build --release
 ### 安装
 用户级（推荐）：
 ```bash
-/path/to/codex-taskloop/scripts/install.sh --scope user
+/path/to/codex-taskloop-plugin/scripts/install.sh --scope user
 ```
 
 Windows（PowerShell）：
@@ -28,13 +28,13 @@ Windows（PowerShell）：
 
 项目级（仅项目级存储）：
 ```bash
-/path/to/codex-taskloop/scripts/install.sh --scope project --project "$(pwd)"
+/path/to/codex-taskloop-plugin/scripts/install.sh --scope project --project "$(pwd)"
 ```
 
 完整参数（Bash `install.sh`）：
 - `--scope <user|project>`：安装范围，默认 `project`
 - `--project <path>`：项目路径（`--scope project` 时使用）
-- `--name <name>`：MCP server 名称/stop hook 名称（默认 `codex-taskloop`）
+- `--name <name>`：MCP server 名称/stop hook 名称（默认 `codex-taskloop-plugin`）
 - `--bin-dir <path>`：指定已构建的二进制目录
 - `--no-mcp`：仅安装/复制二进制与技能，不注册 MCP
 - `--no-hook`：不安装 stop hook
@@ -43,7 +43,7 @@ Windows（PowerShell）：
 完整参数（PowerShell `install.ps1`）：
 - `-Scope <user|project>`：安装范围，默认 `project`
 - `-Project <path>`：项目路径（`-Scope project` 时使用）
-- `-Name <name>`：MCP server 名称/stop hook 名称（默认 `codex-taskloop`）
+- `-Name <name>`：MCP server 名称/stop hook 名称（默认 `codex-taskloop-plugin`）
 - `-BinDir <path>`：指定已构建的二进制目录
 - `-NoMcp`：仅安装/复制二进制与技能，不注册 MCP
 - `-NoHook`：不安装 stop hook
@@ -68,7 +68,7 @@ PowerShell 示例：
 ```
 
 二进制自动搜索与指定目录：
-- 安装脚本会寻找 `codex-taskloop`、`codex-taskloop-hook`、`codex-taskloop-admin`
+- 安装脚本会寻找 `codex-taskloop-plugin`、`codex-taskloop-plugin-hook`、`codex-taskloop-plugin-admin`
 - 默认搜索顺序：`<script_dir>/../target/release`、`<script_dir>/../bin`
 - 未找到且有 `cargo` 时会自动构建（可用 `--no-build` / `-NoBuild` 关闭）
 - 指定目录：`--bin-dir /path/to/dir`（PowerShell: `-BinDir`）
@@ -157,10 +157,10 @@ PowerShell 示例：
 ## 卸载
 用户级：
 ```bash
-/path/to/codex-taskloop/scripts/uninstall.sh --scope user
+/path/to/codex-taskloop-plugin/scripts/uninstall.sh --scope user
 ```
 
 项目级：
 ```bash
-/path/to/codex-taskloop/scripts/uninstall.sh --scope project --project "$(pwd)"
+/path/to/codex-taskloop-plugin/scripts/uninstall.sh --scope project --project "$(pwd)"
 ```

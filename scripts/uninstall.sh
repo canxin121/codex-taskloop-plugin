@@ -5,7 +5,7 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "${SCRIPT_DIR}/.." && pwd)
 
 PROJECT_DIR=$(pwd)
-SERVER_NAME="codex-taskloop"
+SERVER_NAME="codex-taskloop-plugin"
 INSTALL_SCOPE="project"
 SKIP_MCP=0
 SKIP_HOOK=0
@@ -45,8 +45,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 CODEX_HOME_DIR="${CODEX_HOME:-${HOME}/.codex}"
-PROJECT_SKILL_DIR="${PROJECT_DIR}/.codex/skills/codex-taskloop"
-USER_SKILL_DIR="${CODEX_HOME_DIR}/skills/codex-taskloop"
+PROJECT_SKILL_DIR="${PROJECT_DIR}/.codex/skills/codex-taskloop-plugin"
+USER_SKILL_DIR="${CODEX_HOME_DIR}/skills/codex-taskloop-plugin"
 PROJECT_BIN_DIR="${PROJECT_DIR}/.codex/bin"
 USER_BIN_DIR="${CODEX_HOME_DIR}/bin"
 
@@ -83,8 +83,8 @@ else
   fi
 fi
 
-ADMIN_BIN="$(resolve_bin_in_dir "${BIN_DEST_DIR}" "codex-taskloop-admin" || true)"
-HOOK_CMD="$(resolve_bin_in_dir "${BIN_DEST_DIR}" "codex-taskloop-hook" || true)"
+ADMIN_BIN="$(resolve_bin_in_dir "${BIN_DEST_DIR}" "codex-taskloop-plugin-admin" || true)"
+HOOK_CMD="$(resolve_bin_in_dir "${BIN_DEST_DIR}" "codex-taskloop-plugin-hook" || true)"
 
 if [[ ${SKIP_HOOK} -eq 0 ]]; then
   if [[ -z "${ADMIN_BIN}" ]]; then
@@ -156,15 +156,15 @@ remove_bin() {
 }
 
 if [[ -d "${BIN_DEST_DIR}" ]]; then
-  remove_bin "codex-taskloop"
-  remove_bin "codex-taskloop-hook"
-  remove_bin "codex-taskloop-admin"
+  remove_bin "codex-taskloop-plugin"
+  remove_bin "codex-taskloop-plugin-hook"
+  remove_bin "codex-taskloop-plugin-admin"
 fi
 
 if [[ "${INSTALL_SCOPE}" == "project" ]]; then
-  echo "Uninstalled codex-taskloop (project-level MCP + Stop hook)."\
+  echo "Uninstalled codex-taskloop-plugin (project-level MCP + Stop hook)."\
   " Project: ${PROJECT_DIR} | Bin: ${BIN_DEST_DIR} | Skill: ${PROJECT_SKILL_DIR}"
 else
-  echo "Uninstalled codex-taskloop (user-level MCP + Stop hook)."\
+  echo "Uninstalled codex-taskloop-plugin (user-level MCP + Stop hook)."\
   " MCP: ${SERVER_NAME} | Bin: ${BIN_DEST_DIR} | Skill: ${USER_SKILL_DIR}"
 fi

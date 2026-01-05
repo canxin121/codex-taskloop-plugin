@@ -1,4 +1,4 @@
-# codex-taskloop
+# codex-taskloop-plugin
 
 Run a task loop inside a single Codex session so it keeps working until done.
 
@@ -18,7 +18,7 @@ cargo build --release
 ### Install
 User-level (recommended):
 ```bash
-/path/to/codex-taskloop/scripts/install.sh --scope user
+/path/to/codex-taskloop-plugin/scripts/install.sh --scope user
 ```
 
 Windows (PowerShell):
@@ -28,11 +28,11 @@ Windows (PowerShell):
 
 Project-level (project-only storage):
 ```bash
-/path/to/codex-taskloop/scripts/install.sh --scope project --project "$(pwd)"
+/path/to/codex-taskloop-plugin/scripts/install.sh --scope project --project "$(pwd)"
 ```
 
 Binary detection and overrides:
-- The install scripts look for `codex-taskloop`, `codex-taskloop-hook`, and `codex-taskloop-admin`
+- The install scripts look for `codex-taskloop-plugin`, `codex-taskloop-plugin-hook`, and `codex-taskloop-plugin-admin`
 - Default search order: `<script_dir>/../target/release`, `<script_dir>/../bin`
 - If not found and `cargo` is available, they build unless you pass `--no-build` / `-NoBuild`
 - To use a custom location: `--bin-dir /path/to/dir` (PowerShell: `-BinDir`)
@@ -120,10 +120,10 @@ Defaults:
 ## Uninstall
 User-level:
 ```bash
-/path/to/codex-taskloop/scripts/uninstall.sh --scope user
+/path/to/codex-taskloop-plugin/scripts/uninstall.sh --scope user
 ```
 
 Project-level:
 ```bash
-/path/to/codex-taskloop/scripts/uninstall.sh --scope project --project "$(pwd)"
+/path/to/codex-taskloop-plugin/scripts/uninstall.sh --scope project --project "$(pwd)"
 ```

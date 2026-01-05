@@ -5,7 +5,7 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "${SCRIPT_DIR}/.." && pwd)
 
 PROJECT_DIR=$(pwd)
-SERVER_NAME="codex-taskloop"
+SERVER_NAME="codex-taskloop-plugin"
 INSTALL_SCOPE="project"
 SKIP_MCP=0
 SKIP_HOOK=0
@@ -59,8 +59,8 @@ if [[ -n "${BIN_DIR_OVERRIDE}" && ! -d "${BIN_DIR_OVERRIDE}" ]]; then
 fi
 
 CODEX_HOME_DIR="${CODEX_HOME:-${HOME}/.codex}"
-PROJECT_SKILL_DIR="${PROJECT_DIR}/.codex/skills/codex-taskloop"
-USER_SKILL_DIR="${CODEX_HOME_DIR}/skills/codex-taskloop"
+PROJECT_SKILL_DIR="${PROJECT_DIR}/.codex/skills/codex-taskloop-plugin"
+USER_SKILL_DIR="${CODEX_HOME_DIR}/skills/codex-taskloop-plugin"
 PROJECT_BIN_DIR="${PROJECT_DIR}/.codex/bin"
 USER_BIN_DIR="${CODEX_HOME_DIR}/bin"
 
@@ -83,9 +83,9 @@ find_bin_sources() {
   for dir in "$@"; do
     [[ -d "${dir}" ]] || continue
     local mcp hook admin
-    mcp="$(resolve_bin_in_dir "${dir}" "codex-taskloop" || true)"
-    hook="$(resolve_bin_in_dir "${dir}" "codex-taskloop-hook" || true)"
-    admin="$(resolve_bin_in_dir "${dir}" "codex-taskloop-admin" || true)"
+    mcp="$(resolve_bin_in_dir "${dir}" "codex-taskloop-plugin" || true)"
+    hook="$(resolve_bin_in_dir "${dir}" "codex-taskloop-plugin-hook" || true)"
+    admin="$(resolve_bin_in_dir "${dir}" "codex-taskloop-plugin-admin" || true)"
     if [[ -n "${mcp}" && -n "${hook}" && -n "${admin}" ]]; then
       MCP_SRC="${mcp}"
       HOOK_SRC="${hook}"
@@ -186,14 +186,14 @@ if [[ ${SKIP_MCP} -eq 0 ]]; then
 fi
 
 SKILL_SOURCE_DIR=""
-for candidate in "${REPO_ROOT}/.codex/skills/codex-taskloop" "${REPO_ROOT}/skills/codex-taskloop"; do
+for candidate in "${REPO_ROOT}/.codex/skills/codex-taskloop-plugin" "${REPO_ROOT}/skills/codex-taskloop-plugin"; do
   if [[ -d "${candidate}" ]]; then
     SKILL_SOURCE_DIR="${candidate}"
     break
   fi
 done
 if [[ -z "${SKILL_SOURCE_DIR}" ]]; then
-  echo "Skill source not found; expected .codex/skills/codex-taskloop or skills/codex-taskloop" >&2
+  echo "Skill source not found; expected .codex/skills/codex-taskloop-plugin or skills/codex-taskloop-plugin" >&2
   exit 1
 fi
 
@@ -208,10 +208,10 @@ else
 fi
 
 if [[ "${INSTALL_SCOPE}" == "project" ]]; then
-  echo "Installed codex-taskloop (project-level MCP + Stop hook)."\
+  echo "Installed codex-taskloop-plugin (project-level MCP + Stop hook)."\
   " Project: ${PROJECT_DIR}"\
   " | MCP: ${SERVER_NAME} | Hook: ${HOOK_CMD} | Bin: ${BIN_DEST_DIR} | Skill: ${PROJECT_SKILL_DIR}"
 else
-  echo "Installed codex-taskloop (user-level MCP + Stop hook)."\
+  echo "Installed codex-taskloop-plugin (user-level MCP + Stop hook)."\
   " MCP: ${SERVER_NAME} | Hook: ${HOOK_CMD} | Bin: ${BIN_DEST_DIR} | Skill: ${USER_SKILL_DIR}"
 fi

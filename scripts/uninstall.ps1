@@ -2,7 +2,7 @@ param(
   [ValidateSet("project", "user")]
   [string]$Scope = "project",
   [string]$Project = (Get-Location).Path,
-  [string]$Name = "codex-taskloop",
+  [string]$Name = "codex-taskloop-plugin",
   [string]$BinDir = "",
   [switch]$NoMcp,
   [switch]$NoHook
@@ -25,14 +25,14 @@ function Resolve-BinInDir([string]$dir, [string]$name) {
 }
 
 $codexHomeDir = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".codex" }
-$projectSkillDir = Join-Path $Project ".codex\skills\codex-taskloop"
-$userSkillDir = Join-Path $codexHomeDir "skills\codex-taskloop"
+$projectSkillDir = Join-Path $Project ".codex\skills\codex-taskloop-plugin"
+$userSkillDir = Join-Path $codexHomeDir "skills\codex-taskloop-plugin"
 $projectBinDir = Join-Path $Project ".codex\bin"
 $userBinDir = Join-Path $codexHomeDir "bin"
 $binDestDir = if ($BinDir) { $BinDir } elseif ($Scope -eq "project") { $projectBinDir } else { $userBinDir }
 
-$hookBin = Resolve-BinInDir $binDestDir "codex-taskloop-hook"
-$adminBin = Resolve-BinInDir $binDestDir "codex-taskloop-admin"
+$hookBin = Resolve-BinInDir $binDestDir "codex-taskloop-plugin-hook"
+$adminBin = Resolve-BinInDir $binDestDir "codex-taskloop-plugin-admin"
 
 if (-not $NoHook) {
   if (-not $adminBin) {
@@ -76,16 +76,16 @@ if (-not $NoMcp) {
 }
 
 if (Test-Path $binDestDir) {
-  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop")
-  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop.exe")
-  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-hook")
-  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-hook.exe")
-  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-admin")
-  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-admin.exe")
+  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-plugin")
+  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-plugin.exe")
+  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-plugin-hook")
+  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-plugin-hook.exe")
+  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-plugin-admin")
+  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-plugin-admin.exe")
 }
 
 if ($Scope -eq "project") {
-  Write-Host "Uninstalled codex-taskloop (project-level MCP + Stop hook). Project: $Project | Bin: $binDestDir | Skill: $projectSkillDir"
+  Write-Host "Uninstalled codex-taskloop-plugin (project-level MCP + Stop hook). Project: $Project | Bin: $binDestDir | Skill: $projectSkillDir"
 } else {
-  Write-Host "Uninstalled codex-taskloop (user-level MCP + Stop hook). MCP: $Name | Bin: $binDestDir | Skill: $userSkillDir"
+  Write-Host "Uninstalled codex-taskloop-plugin (user-level MCP + Stop hook). MCP: $Name | Bin: $binDestDir | Skill: $userSkillDir"
 }
