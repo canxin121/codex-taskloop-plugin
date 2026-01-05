@@ -47,8 +47,8 @@ done
 CODEX_HOME_DIR="${CODEX_HOME:-${HOME}/.codex}"
 PROJECT_SKILL_DIR="${PROJECT_DIR}/.codex/skills/codex-taskloop-plugin"
 USER_SKILL_DIR="${CODEX_HOME_DIR}/skills/codex-taskloop-plugin"
-PROJECT_BIN_DIR="${PROJECT_DIR}/.codex/bin"
-USER_BIN_DIR="${CODEX_HOME_DIR}/bin"
+PROJECT_BIN_DIR="${PROJECT_SKILL_DIR}/bin"
+USER_BIN_DIR="${USER_SKILL_DIR}/bin"
 
 if [[ "${INSTALL_SCOPE}" != "project" && "${INSTALL_SCOPE}" != "user" ]]; then
   echo "Invalid --scope: ${INSTALL_SCOPE} (expected: project | user)" >&2
@@ -121,14 +121,6 @@ if [[ "${INSTALL_SCOPE}" == "project" ]]; then
   if [[ -d "${PROJECT_DIR}/.codex/task_loop" ]]; then
     rm -rf "${PROJECT_DIR}/.codex/task_loop"
   fi
-
-  if [[ -d "${PROJECT_SKILL_DIR}" ]]; then
-    rm -rf "${PROJECT_SKILL_DIR}"
-  fi
-else
-  if [[ -d "${USER_SKILL_DIR}" ]]; then
-    rm -rf "${USER_SKILL_DIR}"
-  fi
 fi
 
 if [[ ${SKIP_MCP} -eq 0 ]]; then
@@ -159,6 +151,16 @@ if [[ -d "${BIN_DEST_DIR}" ]]; then
   remove_bin "codex-taskloop-plugin"
   remove_bin "codex-taskloop-plugin-hook"
   remove_bin "codex-taskloop-plugin-admin"
+fi
+
+if [[ "${INSTALL_SCOPE}" == "project" ]]; then
+  if [[ -d "${PROJECT_SKILL_DIR}" ]]; then
+    rm -rf "${PROJECT_SKILL_DIR}"
+  fi
+else
+  if [[ -d "${USER_SKILL_DIR}" ]]; then
+    rm -rf "${USER_SKILL_DIR}"
+  fi
 fi
 
 if [[ "${INSTALL_SCOPE}" == "project" ]]; then

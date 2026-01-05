@@ -61,8 +61,8 @@ fi
 CODEX_HOME_DIR="${CODEX_HOME:-${HOME}/.codex}"
 PROJECT_SKILL_DIR="${PROJECT_DIR}/.codex/skills/codex-taskloop-plugin"
 USER_SKILL_DIR="${CODEX_HOME_DIR}/skills/codex-taskloop-plugin"
-PROJECT_BIN_DIR="${PROJECT_DIR}/.codex/bin"
-USER_BIN_DIR="${CODEX_HOME_DIR}/bin"
+PROJECT_BIN_DIR="${PROJECT_SKILL_DIR}/bin"
+USER_BIN_DIR="${USER_SKILL_DIR}/bin"
 
 resolve_bin_in_dir() {
   local dir="$1"
@@ -125,6 +125,30 @@ if ! find_bin_sources "${BIN_CANDIDATES[@]}"; then
   fi
 fi
 
+SKILL_SOURCE_DIR=""
+for candidate in "${REPO_ROOT}/.codex/skills/codex-taskloop-plugin" "${REPO_ROOT}/skills/codex-taskloop-plugin"; do
+  if [[ -d "${candidate}" ]]; then
+    SKILL_SOURCE_DIR="${candidate}"
+    break
+  fi
+done
+if [[ -z "${SKILL_SOURCE_DIR}" ]]; then
+  echo "Skill source not found; expected .codex/skills/codex-taskloop-plugin or skills/codex-taskloop-plugin" >&2
+  exit 1
+fi
+
+if [[ "${INSTALL_SCOPE}" == "project" ]]; then
+  mkdir -p "${PROJECT_DIR}/.codex/skills"
+  rm -rf "${PROJECT_SKILL_DIR}"
+  cp -R "${SKILL_SOURCE_DIR}" "${PROJECT_SKILL_DIR}"
+  SKILL_DEST_DIR="${PROJECT_SKILL_DIR}"
+else
+  mkdir -p "${CODEX_HOME_DIR}/skills"
+  rm -rf "${USER_SKILL_DIR}"
+  cp -R "${SKILL_SOURCE_DIR}" "${USER_SKILL_DIR}"
+  SKILL_DEST_DIR="${USER_SKILL_DIR}"
+fi
+
 if [[ "${INSTALL_SCOPE}" == "project" ]]; then
   BIN_DEST_DIR="${PROJECT_BIN_DIR}"
 else
@@ -183,28 +207,6 @@ if [[ ${SKIP_MCP} -eq 0 ]]; then
         --command "${MCP_BIN}"
     fi
   fi
-fi
-
-SKILL_SOURCE_DIR=""
-for candidate in "${REPO_ROOT}/.codex/skills/codex-taskloop-plugin" "${REPO_ROOT}/skills/codex-taskloop-plugin"; do
-  if [[ -d "${candidate}" ]]; then
-    SKILL_SOURCE_DIR="${candidate}"
-    break
-  fi
-done
-if [[ -z "${SKILL_SOURCE_DIR}" ]]; then
-  echo "Skill source not found; expected .codex/skills/codex-taskloop-plugin or skills/codex-taskloop-plugin" >&2
-  exit 1
-fi
-
-if [[ "${INSTALL_SCOPE}" == "project" ]]; then
-  mkdir -p "${PROJECT_DIR}/.codex/skills"
-  rm -rf "${PROJECT_SKILL_DIR}"
-  cp -R "${SKILL_SOURCE_DIR}" "${PROJECT_SKILL_DIR}"
-else
-  mkdir -p "${CODEX_HOME_DIR}/skills"
-  rm -rf "${USER_SKILL_DIR}"
-  cp -R "${SKILL_SOURCE_DIR}" "${USER_SKILL_DIR}"
 fi
 
 if [[ "${INSTALL_SCOPE}" == "project" ]]; then

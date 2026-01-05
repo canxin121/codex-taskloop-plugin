@@ -27,8 +27,8 @@ function Resolve-BinInDir([string]$dir, [string]$name) {
 $codexHomeDir = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".codex" }
 $projectSkillDir = Join-Path $Project ".codex\skills\codex-taskloop-plugin"
 $userSkillDir = Join-Path $codexHomeDir "skills\codex-taskloop-plugin"
-$projectBinDir = Join-Path $Project ".codex\bin"
-$userBinDir = Join-Path $codexHomeDir "bin"
+$projectBinDir = Join-Path $projectSkillDir "bin"
+$userBinDir = Join-Path $userSkillDir "bin"
 $binDestDir = if ($BinDir) { $BinDir } elseif ($Scope -eq "project") { $projectBinDir } else { $userBinDir }
 
 $hookBin = Resolve-BinInDir $binDestDir "codex-taskloop-plugin-hook"
@@ -57,10 +57,6 @@ if ($Scope -eq "project") {
 
   $taskLoopDir = Join-Path $codexDir "task_loop"
   if (Test-Path $taskLoopDir) { Remove-Item -Recurse -Force $taskLoopDir }
-
-  if (Test-Path $projectSkillDir) { Remove-Item -Recurse -Force $projectSkillDir }
-} else {
-  if (Test-Path $userSkillDir) { Remove-Item -Recurse -Force $userSkillDir }
 }
 
 if (-not $NoMcp) {
@@ -82,6 +78,12 @@ if (Test-Path $binDestDir) {
   Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-plugin-hook.exe")
   Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-plugin-admin")
   Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $binDestDir "codex-taskloop-plugin-admin.exe")
+}
+
+if ($Scope -eq "project") {
+  if (Test-Path $projectSkillDir) { Remove-Item -Recurse -Force $projectSkillDir }
+} else {
+  if (Test-Path $userSkillDir) { Remove-Item -Recurse -Force $userSkillDir }
 }
 
 if ($Scope -eq "project") {
