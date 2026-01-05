@@ -1,0 +1,28 @@
+[package]
+name = "codex-taskloop"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "codex-taskloop"
+path = "src/main.rs"
+
+[[bin]]
+name = "codex-taskloop-hook"
+path = "src/bin/hook.rs"
+
+[[bin]]
+name = "codex-taskloop-admin"
+path = "src/bin/admin.rs"
+
+[dependencies]
+anyhow = "1.0.100"
+chrono = { version = "0.4.42", default-features = false, features = ["clock"] }
+rmcp = "0.12.0"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.148"
+tokio = { version = "1.49.0", features = ["macros", "rt-multi-thread", "io-std"] }
+fs2 = "0.4.3"
+toml = "0.9.8"
+regex = "1.10.3"
+rand = "0.8.5"
