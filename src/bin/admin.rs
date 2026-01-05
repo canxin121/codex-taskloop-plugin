@@ -84,7 +84,7 @@ fn handle_mcp(args: Vec<String>) -> Result<()> {
         let project = flags.get("project").cloned();
         let mut storage_scope = flags.get("storage-scope").cloned();
         if project.is_some() && storage_scope.is_none() {
-            storage_scope = Some("local-only".to_string());
+            storage_scope = Some("project-only".to_string());
         }
         contents = append_block(
             &contents,

@@ -21,8 +21,8 @@
 ## 存储布局
 
 两种存储根目录：
-- local（项目）：`<project>/.codex/task_loop/`
-- global（用户）：`$CODEX_HOME/task_loop/`（未设置则 `~/.codex/task_loop/`）
+- 项目级（project）：`<project>/.codex/task_loop/`
+- 用户级（user）：`$CODEX_HOME/task_loop/`（未设置则 `~/.codex/task_loop/`）
 
 每个根目录包含：
 - `meta.json`（任务索引）
@@ -36,7 +36,8 @@
 ## 任务唯一标识
 
 任务唯一键为：
-- `task_name + project_path`
+- 项目级存储：`task_name`（在项目内唯一）
+- 用户级存储：`task_name + project_path`
 
 约束：
 - `task_name` 必填、单行、长度 <= 30。
@@ -68,7 +69,7 @@
 ```
 
 说明：
-- `project_path` 在 local 与 global 都会记录。
+- `project_path` 在项目级与用户级存储中都会记录。
 - `status` 由 state/history 派生并由 hook 更新。
 
 ## State 文件格式
@@ -101,29 +102,31 @@ History 为 JSONL（每行一个 JSON），字段包括：
 - `completion_promise` / `completion_matcher`
 - `prompt_preview`
 - `state_file` / `history_file`
-- `event`（如 `start`, `loop`, `resume`, `promise_matched`, `max_iterations`）
+- `event`（如 `start`, `loop`, `resume`, `paused`, `promise_matched`, `max_iterations`, `invalid_state`, `invalid_matcher`）
 
 历史按 `history_limit` 保留最近 N 条。
 
 ## Stop hook 任务选择
 
 Stop hook 在 stop 时：
-1. 读取 local + global 的 `meta.json`。
+1. 读取项目级与用户级的 `meta.json`。
 2. 按当前 `project_path` 过滤任务。
 3. 仅保留 state 仍存在的任务。
-4. 从 active 任务中选择最近更新的一个。
+4. 按 `updated_at`/`started_at`（缺省则用 state 文件 mtime）排序，按最近更新依次尝试。
 
 ## Stop hook 决策流程
 
 对选中的任务：
 1. 读取并校验 state。
-2. 若 `active=false`：允许 stop，并记录 `paused`。
+2. 若 `active=false`：记录 `paused` 并继续尝试下一个任务。
 3. 若 `iteration >= max_iterations`（且 max_iterations > 0）：删除 state，记录 `max_iterations`，允许 stop。
 4. 解析最后一条 assistant 消息（`last_agent_message` 或 `rollout_path`）。
 5. 若 `<promise>...</promise>` 匹配：删除 state，记录 `promise_matched`，允许 stop。
-6. 否则：`iteration` +1、写回 state、记录 `loop`、阻止 stop。
+6. 若 matcher 无效：删除 state，记录 `invalid_matcher`，允许 stop。
+7. 否则：`iteration` +1、写回 state、记录 `loop`、阻止 stop。
 
-若 state 异常，hook 会删除并记录 `invalid_state`。
+若 state 异常，hook 会删除并记录 `invalid_state`，然后继续尝试下一个任务。
+若没有可用的 active 任务，hook 将允许 stop。
 
 ## MCP 工具行为
 
@@ -135,9 +138,9 @@ Stop hook 在 stop 时：
 
 ## 存储范围限制
 
-- 用户级安装：可用 `storage=local` 或 `storage=global`。
-- 项目级安装：仅允许 `storage=local`。
-  由 `TASKLOOP_STORAGE_SCOPE=local-only` 强制。
+- 用户级安装：可用 `storage=project` 或 `storage=user`。
+- 项目级安装：仅允许 `storage=project`。
+  由 `TASKLOOP_STORAGE_SCOPE=project-only` 强制。
 
 ## 可靠性
 

@@ -21,8 +21,8 @@ Installation scopes:
 ## Storage layout
 
 Two storage roots:
-- Local (project): `<project>/.codex/task_loop/`
-- Global (user): `$CODEX_HOME/task_loop/` (fallback `~/.codex/task_loop/`)
+- Project (project-level): `<project>/.codex/task_loop/`
+- User (user-level): `$CODEX_HOME/task_loop/` (fallback `~/.codex/task_loop/`)
 
 Each storage root contains:
 - `meta.json` (task index)
@@ -36,7 +36,8 @@ Each storage root contains:
 ## Task identity
 
 A task is uniquely identified by:
-- `task_name + project_path`
+- Project storage: `task_name` (unique within a project)
+- User storage: `task_name + project_path`
 
 Constraints:
 - `task_name` is required, single-line, <= 30 characters.
@@ -68,7 +69,7 @@ Constraints:
 ```
 
 Notes:
-- `project_path` is stored for both local and global tasks.
+- `project_path` is stored for both project and user tasks.
 - `status` is derived from state/history and updated by the hook.
 
 ## State file format
@@ -101,17 +102,17 @@ History is JSONL (one JSON object per line). Each entry includes:
 - `completion_promise` / `completion_matcher`
 - `prompt_preview`
 - `state_file` / `history_file`
-- `event` (e.g. `start`, `loop`, `resume`, `promise_matched`, `max_iterations`)
+- `event` (e.g. `start`, `loop`, `resume`, `paused`, `promise_matched`, `max_iterations`, `invalid_state`, `invalid_matcher`)
 
 History is pruned to the most recent `history_limit` entries.
 
 ## Stop hook task selection
 
 On each stop attempt, the hook:
-1. Loads `meta.json` from local and global roots.
+1. Loads `meta.json` from project and user roots.
 2. Filters tasks by current `project_path`.
 3. Keeps only tasks with existing `state.md`.
-4. Picks the most recently updated active task.
+4. Sorts candidates by `updated_at`/`started_at` (fallback to state file mtime) and iterates most recent first.
 
 This prevents unrelated tasks from other projects from interfering.
 
@@ -119,13 +120,15 @@ This prevents unrelated tasks from other projects from interfering.
 
 For the selected task:
 1. Read and validate state.
-2. If `active=false`: approve stop and record `paused`.
+2. If `active=false`: record `paused` and move to the next candidate.
 3. If `iteration >= max_iterations` (and max_iterations > 0): delete state, record `max_iterations`, approve stop.
 4. Extract last assistant message (`last_agent_message` or `rollout_path`).
 5. If `<promise>...</promise>` matches: delete state, record `promise_matched`, approve stop.
-6. Otherwise: increment iteration, write state, record `loop`, block stop with original prompt.
+6. If the matcher is invalid: delete state, record `invalid_matcher`, approve stop.
+7. Otherwise: increment iteration, write state, record `loop`, block stop with original prompt.
 
-If state is malformed, the hook deletes it and records `invalid_state`.
+If state is malformed, the hook deletes it, records `invalid_state`, and moves on.
+If no active task yields a decision, the hook approves stop.
 
 ## MCP tool behaviors
 
@@ -137,9 +140,9 @@ If state is malformed, the hook deletes it and records `invalid_state`.
 
 ## Storage scope enforcement
 
-- User-level install: `storage=local` or `storage=global` allowed.
-- Project-level install: only `storage=local` allowed.
-  Enforced by `TASKLOOP_STORAGE_SCOPE=local-only`.
+- User-level install: `storage=project` or `storage=user` allowed.
+- Project-level install: only `storage=project` allowed.
+  Enforced by `TASKLOOP_STORAGE_SCOPE=project-only`.
 
 ## Reliability
 

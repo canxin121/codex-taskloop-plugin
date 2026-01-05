@@ -69,7 +69,7 @@ impl TaskloopServer {
                     "enum": ["exact", "case_insensitive", "regex"]
                 },
                 "history_limit": { "type": "integer", "minimum": 0, "description": "Max history entries to retain (0 disables pruning)." },
-                "storage": { "type": "string", "enum": ["local", "global"], "description": "Where to store task files (default: local)." },
+                "storage": { "type": "string", "enum": ["project", "user"], "description": "Where to store task files: project or user (default: project)." },
                 "project_dir": { "type": "string", "description": "Project root (defaults to CODEX_CWD or current directory)." }
             },
             "required": ["prompt"],
@@ -88,8 +88,8 @@ impl TaskloopServer {
         let schema: JsonObject = serde_json::from_value(json!({
             "type": "object",
             "properties": {
-                "storage": { "type": "string", "enum": ["local", "global"], "description": "Where to list tasks (default: local)." },
-                "project_dir": { "type": "string", "description": "Project root to filter (defaults to current for local)." },
+                "storage": { "type": "string", "enum": ["project", "user"], "description": "Where to list tasks: project or user (default: project)." },
+                "project_dir": { "type": "string", "description": "Project root to filter (defaults to current for project storage)." },
                 "limit": { "type": "integer", "minimum": 1, "maximum": 2000, "description": "Max tasks to return (default 50)." },
                 "offset": { "type": "integer", "minimum": 0, "description": "Offset into sorted task list." }
             },
@@ -109,8 +109,8 @@ impl TaskloopServer {
             "type": "object",
             "properties": {
                 "task_name": { "type": "string", "description": "Task name to resume." },
-                "storage": { "type": "string", "enum": ["local", "global"], "description": "Where to look for task files (default: local)." },
-                "project_dir": { "type": "string", "description": "Project root (required for global tasks)." }
+                "storage": { "type": "string", "enum": ["project", "user"], "description": "Where to look for task files: project or user (default: project)." },
+                "project_dir": { "type": "string", "description": "Project root (required for user storage tasks)." }
             },
             "required": ["task_name"],
             "additionalProperties": false
@@ -130,8 +130,8 @@ impl TaskloopServer {
             "properties": {
                 "task_name": { "type": "string", "description": "Existing task name." },
                 "new_name": { "type": "string", "description": "New task name (max 30 chars)." },
-                "storage": { "type": "string", "enum": ["local", "global"], "description": "Where to look for task files (default: local)." },
-                "project_dir": { "type": "string", "description": "Project root (required for global tasks)." }
+                "storage": { "type": "string", "enum": ["project", "user"], "description": "Where to look for task files: project or user (default: project)." },
+                "project_dir": { "type": "string", "description": "Project root (required for user storage tasks)." }
             },
             "required": ["task_name", "new_name"],
             "additionalProperties": false
@@ -150,8 +150,8 @@ impl TaskloopServer {
             "type": "object",
             "properties": {
                 "task_name": { "type": "string", "description": "Task name to delete." },
-                "storage": { "type": "string", "enum": ["local", "global"], "description": "Where to look for task files (default: local)." },
-                "project_dir": { "type": "string", "description": "Project root (required for global tasks)." }
+                "storage": { "type": "string", "enum": ["project", "user"], "description": "Where to look for task files: project or user (default: project)." },
+                "project_dir": { "type": "string", "description": "Project root (required for user storage tasks)." }
             },
             "required": ["task_name"],
             "additionalProperties": false
@@ -249,13 +249,13 @@ impl ConfigDefaults {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum StorageMode {
-    Local,
-    Global,
+    Project,
+    User,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum StorageScope {
-    LocalOnly,
+    ProjectOnly,
     Both,
 }
 
@@ -435,7 +435,7 @@ impl ServerHandler for TaskloopServer {
             "task_list" => {
                 let args: TaskloopListArgs = parse_args(request.arguments)?;
                 let storage_mode = enforce_storage_mode(scope, parse_storage_mode(args.storage)?)?;
-                let resolved_project_dir = if storage_mode == StorageMode::Local {
+                let resolved_project_dir = if storage_mode == StorageMode::Project {
                     Some(resolve_project_dir(args.project_dir.clone())?)
                 } else if let Some(value) = args.project_dir.clone() {
                     Some(resolve_project_dir(Some(value))?)
@@ -446,13 +446,13 @@ impl ServerHandler for TaskloopServer {
                     .as_ref()
                     .map(|dir| dir.to_string_lossy().to_string());
                 let storage_root = match storage_mode {
-                    StorageMode::Local => {
+                    StorageMode::Project => {
                         let dir = resolved_project_dir
                             .as_ref()
-                            .expect("local storage requires project_dir");
-                        storage_root_for_mode(dir, StorageMode::Local)
+                            .expect("project storage requires project_dir");
+                        storage_root_for_mode(dir, StorageMode::Project)
                     }
-                    StorageMode::Global => global_store_root(),
+                    StorageMode::User => user_store_root(),
                 };
 
                 let limit = args.limit.unwrap_or(DEFAULT_LIST_LIMIT).clamp(1, 2000) as usize;
@@ -554,9 +554,9 @@ impl ServerHandler for TaskloopServer {
                 let args: TaskArgs = parse_args(request.arguments)?;
                 let provided_project = args.project_dir.is_some();
                 let storage_mode = enforce_storage_mode(scope, parse_storage_mode(args.storage)?)?;
-                if storage_mode == StorageMode::Global && !provided_project {
+                if storage_mode == StorageMode::User && !provided_project {
                     return Err(McpError::invalid_params(
-                        "project_dir is required for global storage",
+                        "project_dir is required for user storage",
                         None,
                     ));
                 }
@@ -619,9 +619,9 @@ impl ServerHandler for TaskloopServer {
                 let args: TaskloopRenameArgs = parse_args(request.arguments)?;
                 let provided_project = args.project_dir.is_some();
                 let storage_mode = enforce_storage_mode(scope, parse_storage_mode(args.storage)?)?;
-                if storage_mode == StorageMode::Global && !provided_project {
+                if storage_mode == StorageMode::User && !provided_project {
                     return Err(McpError::invalid_params(
-                        "project_dir is required for global storage",
+                        "project_dir is required for user storage",
                         None,
                     ));
                 }
@@ -692,9 +692,9 @@ impl ServerHandler for TaskloopServer {
                 let args: TaskArgs = parse_args(request.arguments)?;
                 let provided_project = args.project_dir.is_some();
                 let storage_mode = enforce_storage_mode(scope, parse_storage_mode(args.storage)?)?;
-                if storage_mode == StorageMode::Global && !provided_project {
+                if storage_mode == StorageMode::User && !provided_project {
                     return Err(McpError::invalid_params(
-                        "project_dir is required for global storage",
+                        "project_dir is required for user storage",
                         None,
                     ));
                 }
@@ -800,13 +800,13 @@ fn expand_tilde(path: &str) -> PathBuf {
 }
 
 fn parse_storage_mode(value: Option<String>) -> Result<StorageMode, McpError> {
-    let mode = value.unwrap_or_else(|| "local".to_string());
+    let mode = value.unwrap_or_else(|| "project".to_string());
     let normalized = mode.trim().to_ascii_lowercase();
     match normalized.as_str() {
-        "" | "local" | "project" => Ok(StorageMode::Local),
-        "global" | "user" => Ok(StorageMode::Global),
+        "" | "project" | "local" => Ok(StorageMode::Project),
+        "user" | "global" => Ok(StorageMode::User),
         _ => Err(McpError::invalid_params(
-            "storage must be local or global",
+            "storage must be project or user",
             None,
         )),
     }
@@ -816,8 +816,8 @@ fn storage_scope_from_env() -> StorageScope {
     let value = std::env::var("TASKLOOP_STORAGE_SCOPE").unwrap_or_default();
     let normalized = value.trim().to_ascii_lowercase();
     match normalized.as_str() {
-        "local" | "local-only" | "project" | "project-only" => StorageScope::LocalOnly,
-        "" | "both" | "all" | "global" => StorageScope::Both,
+        "project" | "project-only" | "local" | "local-only" => StorageScope::ProjectOnly,
+        "" | "both" | "all" | "user" | "global" => StorageScope::Both,
         _ => StorageScope::Both,
     }
 }
@@ -826,16 +826,16 @@ fn enforce_storage_mode(
     scope: StorageScope,
     mode: StorageMode,
 ) -> Result<StorageMode, McpError> {
-    if scope == StorageScope::LocalOnly && mode == StorageMode::Global {
+    if scope == StorageScope::ProjectOnly && mode == StorageMode::User {
         return Err(McpError::invalid_params(
-            "storage=global is not allowed for project-level install; use storage=local",
+            "storage=user is not allowed for project-level install; use storage=project",
             None,
         ));
     }
     Ok(mode)
 }
 
-fn local_store_root(project_dir: &Path) -> PathBuf {
+fn project_store_root(project_dir: &Path) -> PathBuf {
     project_dir.join(".codex").join(STORE_DIR_NAME)
 }
 
@@ -851,21 +851,21 @@ fn codex_home_dir() -> PathBuf {
     PathBuf::from(".codex")
 }
 
-fn global_store_root() -> PathBuf {
+fn user_store_root() -> PathBuf {
     codex_home_dir().join(STORE_DIR_NAME)
 }
 
 fn storage_root_for_mode(project_dir: &Path, mode: StorageMode) -> PathBuf {
     match mode {
-        StorageMode::Local => local_store_root(project_dir),
-        StorageMode::Global => global_store_root(),
+        StorageMode::Project => project_store_root(project_dir),
+        StorageMode::User => user_store_root(),
     }
 }
 
 fn storage_label(mode: StorageMode) -> &'static str {
     match mode {
-        StorageMode::Local => "local",
-        StorageMode::Global => "global",
+        StorageMode::Project => "project",
+        StorageMode::User => "user",
     }
 }
 
@@ -1005,8 +1005,8 @@ fn write_meta(root: &Path, meta: &MetaIndex) -> Result<()> {
 
 fn task_exists(meta: &MetaIndex, task_name: &str, project_path: Option<&str>, mode: StorageMode) -> bool {
     meta.tasks.iter().any(|task| match mode {
-        StorageMode::Local => task.task_name == task_name,
-        StorageMode::Global => {
+        StorageMode::Project => task.task_name == task_name,
+        StorageMode::User => {
             task.task_name == task_name && task.project_path.as_deref() == project_path
         }
     })
@@ -1019,8 +1019,8 @@ fn find_task_index(
     mode: StorageMode,
 ) -> Option<usize> {
     meta.tasks.iter().position(|task| match mode {
-        StorageMode::Local => task.task_name == task_name,
-        StorageMode::Global => {
+        StorageMode::Project => task.task_name == task_name,
+        StorageMode::User => {
             task.task_name == task_name && task.project_path.as_deref() == project_path
         }
     })

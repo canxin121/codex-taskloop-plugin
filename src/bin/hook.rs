@@ -645,7 +645,7 @@ fn parse_bool(value: Option<&String>, default: bool) -> bool {
     }
 }
 
-fn local_store_root(project_dir: &Path) -> PathBuf {
+fn project_store_root(project_dir: &Path) -> PathBuf {
     project_dir.join(".codex").join(STORE_DIR_NAME)
 }
 
@@ -661,18 +661,18 @@ fn codex_home_dir() -> PathBuf {
     PathBuf::from(".codex")
 }
 
-fn global_store_root() -> PathBuf {
+fn user_store_root() -> PathBuf {
     codex_home_dir().join(STORE_DIR_NAME)
 }
 
 fn storage_roots_for_hook(project_dir: &Path, project_path: &str) -> Vec<StorageRoot> {
     vec![
         StorageRoot {
-            root: local_store_root(project_dir),
+            root: project_store_root(project_dir),
             project_path: project_path.to_string(),
         },
         StorageRoot {
-            root: global_store_root(),
+            root: user_store_root(),
             project_path: project_path.to_string(),
         },
     ]
